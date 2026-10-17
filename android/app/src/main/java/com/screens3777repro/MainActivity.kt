@@ -79,6 +79,12 @@ class MainActivity : ReactActivity() {
     return candidates.maxByOrNull { it.first }?.second
   }
 
+  @Suppress("DEPRECATION")
+  override fun onBackPressed() {
+    Log.i("ReproBack", "callback uptime=${android.os.SystemClock.uptimeMillis()}")
+    super.onBackPressed()
+  }
+
   override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
     if (event.keyCode == android.view.KeyEvent.KEYCODE_BACK) {
       android.util.Log.i("ReproBack", "action=${event.action} eventTime=${event.eventTime} uptime=${android.os.SystemClock.uptimeMillis()}")

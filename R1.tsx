@@ -1,10 +1,10 @@
-import React, {createContext, useContext, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import { Button, Image, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Button, Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 type OuterRoutes = { Home: undefined; Workspace: undefined };
@@ -122,12 +122,31 @@ function MiddleNavigator() {
   );
 }
 
+declare const globalThis: {performance: {now(): number}};
+let backSeq = 0;
+
+// Registered after NavigationContainer, so BackHandler calls it before React Navigation.
+function BackProbe() {
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      backSeq += 1;
+      console.info(`ReproBack js seq=${backSeq} perfMs=${globalThis.performance.now().toFixed(1)} wallMs=${Date.now()}`);
+      return false;
+    });
+    return () => sub.remove();
+  }, []);
+  return null;
+}
+
 export default function App() {
   const [revision, setRevision] = useState(0);
   return (
     <HeaderRevision.Provider value={{revision, update: () => setRevision(value => value + 1)}}>
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer
+        onStateChange={state =>
+          console.info(`ReproNav perfMs=${globalThis.performance.now().toFixed(1)} routes=${JSON.stringify(routeNames(state))}`)
+        }>
         <Outer.Navigator screenOptions={{ animation: 'default' }}>
           <Outer.Screen name="Home" component={Home} />
           <Outer.Screen
@@ -137,9 +156,14 @@ export default function App() {
           />
         </Outer.Navigator>
       </NavigationContainer>
+      <BackProbe />
     </SafeAreaProvider>
     </HeaderRevision.Provider>
   );
+}
+
+function routeNames(state: any): unknown {
+  return state?.routes?.map((r: any) => (r.state ? [r.name, routeNames(r.state)] : r.name));
 }
 
 const styles = StyleSheet.create({
