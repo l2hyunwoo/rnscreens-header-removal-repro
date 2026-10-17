@@ -1,0 +1,3 @@
+[submodule "vendor/react-native-screens"]
+	path = vendor/react-native-screens
+	url = https://github.com/software-mansion/react-native-screens.git
