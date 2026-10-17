@@ -1,0 +1,17 @@
+plugins { id 'com.android.library' version '9.1.1' }
+android {
+    namespace 'review.rnscreens3777'
+    compileSdk 36
+    defaultConfig { minSdk 24 }
+    testOptions { unitTests.includeAndroidResources = true }
+}
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.16.1'
+}
+tasks.withType(Test).configureEach {
+    systemProperty 'robolectric.dependency.repo.url', 'https://repo.maven.apache.org/maven2'
+    testLogging { events 'passed', 'failed', 'standardOut', 'standardError' }
+}
